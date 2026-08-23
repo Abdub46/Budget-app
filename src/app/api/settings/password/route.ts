@@ -11,7 +11,7 @@ export async function POST(req: Request) {
   return withErrorHandling(async () => {
     const userId = await requireUserId();
 
-    const limitResult = rateLimit(`password-change:${userId}`, { limit: 5, windowMs: 10 * 60_000 });
+    const limitResult = await rateLimit(`password-change:${userId}`, { limit: 5, windowMs: 10 * 60_000 });
     if (!limitResult.success) {
       return jsonError(429, 'Too many attempts. Please try again later.');
     }

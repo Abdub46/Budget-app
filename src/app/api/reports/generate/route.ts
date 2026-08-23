@@ -16,7 +16,7 @@ export async function POST(req: Request) {
     const userId = await requireUserId();
 
     // PDF rendering + email sending are relatively expensive — guard against abuse.
-    const limitResult = rateLimit(`report-generate:${userId}`, { limit: 10, windowMs: 60_000 });
+    const limitResult = await rateLimit(`report-generate:${userId}`, { limit: 10, windowMs: 60_000 });
     if (!limitResult.success) {
       return jsonError(429, 'Please wait a moment before generating another report.');
     }

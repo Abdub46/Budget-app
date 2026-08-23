@@ -12,7 +12,7 @@ export async function POST(_req: Request, { params }: { params: { id: string } }
     const userId = await requireUserId();
     if (!isValidObjectId(params.id)) return jsonError(400, 'Invalid report ID.');
 
-    const limitResult = rateLimit(`report-resend:${userId}`, { limit: 5, windowMs: 60_000 });
+    const limitResult = await rateLimit(`report-resend:${userId}`, { limit: 5, windowMs: 60_000 });
     if (!limitResult.success) {
       return jsonError(429, 'Please wait a moment before resending another report.');
     }

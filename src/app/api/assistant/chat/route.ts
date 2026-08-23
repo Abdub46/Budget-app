@@ -12,7 +12,7 @@ export async function POST(req: Request) {
     const userId = await requireUserId();
 
     // Modest per-user rate limit — chat calls hit a paid AI API.
-    const limitResult = rateLimit(`assistant-chat:${userId}`, { limit: 20, windowMs: 60_000 });
+    const limitResult = await rateLimit(`assistant-chat:${userId}`, { limit: 20, windowMs: 60_000 });
     if (!limitResult.success) {
       return jsonError(429, 'You\u2019re sending messages too quickly. Please slow down.');
     }

@@ -4,6 +4,7 @@ import { Toaster } from 'sonner';
 import AuthProvider from '@/components/providers/AuthProvider';
 import ThemeProvider from '@/components/providers/ThemeProvider';
 import MotionProvider from '@/components/providers/MotionProvider';
+import ServiceWorkerRegister from '@/components/providers/ServiceWorkerRegister';
 import { getSession } from '@/lib/session';
 import './globals.css';
 
@@ -20,6 +21,19 @@ export const metadata: Metadata = {
   },
   description:
     'A premium personal budgeting and finance management app: track budgets, expenses, savings, and get AI-powered financial insights.',
+  manifest: '/manifest.json',
+  icons: {
+    icon: [
+      { url: '/favicon.png', sizes: '32x32', type: 'image/png' },
+      { url: '/icons/icon-192.png', sizes: '192x192', type: 'image/png' },
+    ],
+    apple: [{ url: '/apple-touch-icon.png', sizes: '180x180', type: 'image/png' }],
+  },
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: 'default',
+    title: 'Budget',
+  },
 };
 
 export const viewport: Viewport = {
@@ -46,6 +60,7 @@ export default async function RootLayout({
             <AuthProvider session={session}>
               {children}
               <Toaster position="top-right" richColors closeButton />
+              <ServiceWorkerRegister />
             </AuthProvider>
           </MotionProvider>
         </ThemeProvider>

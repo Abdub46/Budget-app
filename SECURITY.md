@@ -47,11 +47,15 @@ look if you're auditing or extending it.
 
 ## Rate limiting
 
-In-memory sliding-window limiter (`src/lib/rate-limit.ts`), applied to:
-login, registration, password change, expense/budget/category creation, AI
-chat, and report generation/resend. For a multi-instance production
-deployment, swap the in-memory `Map` for Redis/Upstash — the function
-signature is designed to make that a drop-in change.
+Sliding-window limiter (`src/lib/rate-limit.ts`), applied to: login,
+registration, password change, expense/budget/category creation, AI chat,
+and report generation/resend. Backed by Upstash Redis (REST-based, so it
+works from serverless functions) when `UPSTASH_REDIS_REST_URL` /
+`UPSTASH_REDIS_REST_TOKEN` are set — this keeps limits consistent across
+every server instance/region. Falls back to an in-memory `Map` when those
+env vars are absent (e.g. local dev), and also fails open to the in-memory
+limiter if Redis is temporarily unreachable, so a Redis outage degrades
+rate-limit accuracy rather than taking the app down.
 
 ## Database
 
@@ -84,9 +88,10 @@ signature is designed to make that a drop-in change.
 
 ## Known trade-offs (documented, not hidden)
 
-- The rate limiter is in-memory and per-instance; fine for a single-region
-  deployment, not for multi-instance production traffic without a shared
-  store.
+- The rate limiter falls back to an in-memory, per-instance store when
+  `UPSTASH_REDIS_REST_URL`/`UPSTASH_REDIS_REST_TOKEN` aren't set. That's
+  fine for local dev but not for multi-instance production traffic —
+  set those env vars in any real deployment.
 - MongoDB multi-document transactions aren't used for the budget-addition
   write (create `BudgetAddition` + increment `MonthlyBudget`) — most
   MongoDB Atlas tiers run as a replica set where this would work, but the

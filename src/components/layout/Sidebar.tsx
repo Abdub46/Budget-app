@@ -6,16 +6,24 @@ import { Wallet } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { NAV_ITEMS } from '@/lib/nav';
 import SignOutButton from '@/components/auth/SignOutButton';
+import Avatar from '@/components/ui/Avatar';
+import { useAvatar } from '@/components/providers/AvatarProvider';
 
 export default function Sidebar({ userName }: { userName?: string | null }) {
   const pathname = usePathname();
+  const { avatarUrl } = useAvatar();
 
   return (
     <aside className="hidden lg:flex lg:flex-col lg:w-64 lg:shrink-0 border-r border-border bg-card/50 h-screen sticky top-0">
       <div className="flex items-center gap-2 px-6 h-16 border-b border-border">
-        <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary text-primary-foreground">
-          <Wallet className="h-[18px] w-[18px]" />
-        </span>
+        <Avatar
+          src={avatarUrl}
+          name={userName}
+          size={32}
+          className="rounded-lg"
+          showInitials={false}
+          fallbackIcon={<Wallet className="h-[18px] w-[18px]" />}
+        />
         <span className="font-semibold text-foreground">Budget</span>
       </div>
 

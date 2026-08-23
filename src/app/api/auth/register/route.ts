@@ -9,7 +9,7 @@ import { rateLimit, getClientIp } from '@/lib/rate-limit';
 export async function POST(req: Request) {
   try {
     const ip = getClientIp(req);
-    const limitResult = rateLimit(`register:${ip}`, { limit: 10, windowMs: 60 * 60_000 });
+    const limitResult = await rateLimit(`register:${ip}`, { limit: 10, windowMs: 60 * 60_000 });
     if (!limitResult.success) {
       return NextResponse.json(
         { error: 'Too many registration attempts. Please try again later.' },

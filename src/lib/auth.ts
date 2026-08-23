@@ -31,7 +31,7 @@ export const authOptions: NextAuthOptions = {
         const { email, password } = parsed.data;
 
         // Rate-limit login attempts per email to slow down credential stuffing.
-        const limitResult = rateLimit(`login:${email.toLowerCase()}`, {
+        const limitResult = await rateLimit(`login:${email.toLowerCase()}`, {
           limit: 8,
           windowMs: 5 * 60_000,
         });

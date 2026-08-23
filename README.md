@@ -27,6 +27,7 @@ OpenAI-compatible AI Financial Assistant.
    | `AI_API_KEY`, `AI_API_BASE_URL`, `AI_MODEL` | Any OpenAI-compatible provider, for the AI Financial Assistant |
    | `CRON_SECRET` | Random string authorizing `/api/cron/month-end` |
    | `NEXT_PUBLIC_APP_URL` | App URL, used in a couple of client-side links |
+   | `UPSTASH_REDIS_REST_URL`, `UPSTASH_REDIS_REST_TOKEN` | Optional for local dev (falls back to in-memory), required in production — from [console.upstash.com](https://console.upstash.com/), used for rate limiting |
 
 3. **Run the dev server**
 

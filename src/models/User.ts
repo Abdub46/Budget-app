@@ -19,6 +19,7 @@ export interface IUser {
   phone: string;
   country: string;
   currency: string;
+  avatar?: string;
 
   employmentStatus: EmploymentStatus;
 
@@ -74,6 +75,11 @@ const UserSchema = new Schema<IUser>(
     phone: { type: String, required: true, trim: true },
     country: { type: String, required: true, trim: true },
     currency: { type: String, required: true, default: 'KES', uppercase: true },
+
+    // Stored as a compact base64 data URI (resized/compressed client-side
+    // before upload — see AvatarSection). The 400,000-char cap is a
+    // generous ceiling for a ~256x256 JPEG; real uploads land well under it.
+    avatar: { type: String, maxlength: 400_000, default: undefined },
 
     employmentStatus: {
       type: String,

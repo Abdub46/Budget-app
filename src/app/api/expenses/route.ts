@@ -53,7 +53,7 @@ export async function POST(req: Request) {
   return withErrorHandling(async () => {
     const userId = await requireUserId();
 
-    const limitResult = rateLimit(`expense-create:${userId}`, { limit: 60, windowMs: 60_000 });
+    const limitResult = await rateLimit(`expense-create:${userId}`, { limit: 60, windowMs: 60_000 });
     if (!limitResult.success) {
       return jsonError(429, 'Too many requests. Please slow down.');
     }

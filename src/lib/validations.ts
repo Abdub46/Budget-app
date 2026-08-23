@@ -90,7 +90,7 @@ export const budgetAdditionSchema = z.object({
 export const expenseSchema = z.object({
   amount: z.coerce.number().positive('Amount must be greater than 0'),
   categoryId: z.string().min(1, 'Select a category'),
-    categoryType: categoryTypeEnum.optional(),
+  categoryType: categoryTypeEnum.optional(),
   destination: optionalFreeText(120),
   description: optionalFreeText(240),
   paymentMethod: paymentMethodEnum.default('cash'),
@@ -119,6 +119,20 @@ export const profileUpdateSchema = z.object({
 export const financialProfileSchema = z.object({
   averageMonthlyBudget: z.coerce.number().min(0).max(1_000_000_000),
   currency: z.string().trim().length(3),
+});
+
+/**
+ * Avatar is uploaded as a data URI (resized/compressed to a small JPEG or
+ * WebP client-side before it ever reaches the server — see AvatarSection).
+ * `avatar: null` clears the photo. The 400,000-char cap matches the
+ * Mongoose schema's maxlength.
+ */
+export const avatarUpdateSchema = z.object({
+  avatar: z
+    .string()
+    .max(400_000, 'Image is too large.')
+    .regex(/^data:image\/(png|jpe?g|webp);base64,/, 'Unsupported image format.')
+    .nullable(),
 });
 
 export const passwordChangeSchema = z
