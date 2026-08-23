@@ -1,0 +1,97 @@
+'use client';
+
+import { motion } from 'framer-motion';
+import { TrendingUp, TrendingDown, CheckCircle2, PlusCircle } from 'lucide-react';
+import Link from 'next/link';
+import { formatCurrency, formatPercent } from '@/lib/utils';
+import { Button } from '@/components/ui/Button';
+
+interface MonthlyStatusCardProps {
+  label: string;
+  currency: string;
+  hasBudget: boolean;
+  totalBudget?: number;
+  averageMonthlyBudget: number;
+  comparison?: { status: 'above' | 'below' | 'equal'; absDiff: number; percent: number };
+}
+
+const STATUS_CONFIG = {
+  above: {
+    icon: TrendingUp,
+    badge: 'bg-warning-light text-warning-dark',
+    text: 'above average',
+  },
+  below: {
+    icon: TrendingDown,
+    badge: 'bg-primary-100 text-primary-700',
+    text: 'below average',
+  },
+  equal: {
+    icon: CheckCircle2,
+    badge: 'bg-success-light text-success-dark',
+    text: 'at average',
+  },
+};
+
+export default function MonthlyStatusCard({
+  label,
+  currency,
+  hasBudget,
+  totalBudget,
+  averageMonthlyBudget,
+  comparison,
+}: MonthlyStatusCardProps) {
+  if (!hasBudget) {
+    return (
+      <div className="rounded-2xl border border-dashed border-border bg-card p-6 text-center">
+        <p className="text-sm text-muted-foreground">
+          No budget recorded for <span className="font-medium text-foreground">{label}</span>.
+        </p>
+        <Link href="/budget">
+          <Button className="mt-4" size="sm">
+            <PlusCircle className="h-3.5 w-3.5" />
+            Set up this month&apos;s budget
+          </Button>
+        </Link>
+      </div>
+    );
+  }
+
+  const { icon: Icon, badge, text } = STATUS_CONFIG[comparison!.status];
+
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 8 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.3 }}
+      className="rounded-2xl border border-border bg-gradient-to-br from-card to-muted/40 p-6 shadow-card"
+    >
+      <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+        {label} Budget
+      </p>
+      <p className="mt-1 text-3xl font-semibold text-foreground">
+        {formatCurrency(totalBudget ?? 0, currency)}
+      </p>
+
+      <div className="mt-3 flex flex-wrap items-center gap-3">
+        <span
+          className={`inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-medium ${badge}`}
+        >
+          <Icon className="h-3.5 w-3.5" />
+          {comparison!.status === 'equal'
+            ? 'At Average'
+            : `${formatCurrency(comparison!.absDiff, currency)} ${text}`}
+        </span>
+        {comparison!.status !== 'equal' && (
+          <span className="text-xs text-muted-foreground">
+            {formatPercent(comparison!.percent)} {text}
+          </span>
+        )}
+      </div>
+
+      <p className="mt-3 text-xs text-muted-foreground">
+        Average monthly budget: {formatCurrency(averageMonthlyBudget, currency)}
+      </p>
+    </motion.div>
+  );
+}
