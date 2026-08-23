@@ -47,7 +47,7 @@ export default function ProfileSection(props: ProfileSectionProps) {
         return;
       }
       toast.success('Profile updated.');
-      onSaved(result.user);
+      props.onSaved(result.user);
     } finally {
       setIsSaving(false);
     }
