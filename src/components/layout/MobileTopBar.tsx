@@ -17,7 +17,7 @@ export default function MobileTopBar({ userName }: { userName?: string | null })
         showInitials={false}
         fallbackIcon={<Wallet className="h-4 w-4" />}
       />
-      <span className="font-semibold text-foreground">Budget</span>
+      <span className="font-semibold text-foreground">BUDGET</span>
     </header>
   );
 }
