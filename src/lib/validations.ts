@@ -90,7 +90,7 @@ export const budgetAdditionSchema = z.object({
 export const expenseSchema = z.object({
   amount: z.coerce.number().positive('Amount must be greater than 0'),
   categoryId: z.string().min(1, 'Select a category'),
-  categoryType: categoryTypeEnum,
+    categoryType: categoryTypeEnum.optional(),
   destination: optionalFreeText(120),
   description: optionalFreeText(240),
   paymentMethod: paymentMethodEnum.default('cash'),
