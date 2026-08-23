@@ -1,7 +1,8 @@
 'use client';
 
+import { useState } from 'react';
 import { motion } from 'framer-motion';
-import { TrendingUp, TrendingDown, CheckCircle2, PlusCircle } from 'lucide-react';
+import { TrendingUp, TrendingDown, CheckCircle2, PlusCircle, Eye, EyeOff } from 'lucide-react';
 import Link from 'next/link';
 import { formatCurrency, formatPercent } from '@/lib/utils';
 import { Button } from '@/components/ui/Button';
@@ -41,6 +42,8 @@ export default function MonthlyStatusCard({
   averageMonthlyBudget,
   comparison,
 }: MonthlyStatusCardProps) {
+  const [isHidden, setIsHidden] = useState(false);
+
   if (!hasBudget) {
     return (
       <div className="rounded-2xl border border-dashed border-border bg-card p-6 text-center">
@@ -69,9 +72,20 @@ export default function MonthlyStatusCard({
       <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
         {label} Budget
       </p>
-      <p className="mt-1 text-3xl font-semibold text-foreground">
-        {formatCurrency(totalBudget ?? 0, currency)}
-      </p>
+      <div className="mt-1 flex items-center gap-2">
+        <p className="text-3xl font-semibold text-foreground tabular-nums">
+          {isHidden ? '••••••' : formatCurrency(totalBudget ?? 0, currency)}
+        </p>
+        <button
+          type="button"
+          onClick={() => setIsHidden((v) => !v)}
+          aria-label={isHidden ? 'Show budget amount' : 'Hide budget amount'}
+          aria-pressed={isHidden}
+          className="rounded-full p-1.5 text-muted-foreground hover:text-foreground hover:bg-muted transition-colors"
+        >
+          {isHidden ? <Eye className="h-[18px] w-[18px]" /> : <EyeOff className="h-[18px] w-[18px]" />}
+        </button>
+      </div>
 
       <div className="mt-3 flex flex-wrap items-center gap-3">
         <span
@@ -95,3 +109,4 @@ export default function MonthlyStatusCard({
     </motion.div>
   );
 }
+
