@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import AccountSection from '@/components/settings/AccountSection';
+import AvatarSection from '@/components/settings/AvatarSection';
 import PasswordSection from '@/components/settings/PasswordSection';
 import ProfileSection from '@/components/settings/ProfileSection';
 import FinancialSection from '@/components/settings/FinancialSection';
@@ -59,6 +60,8 @@ export default function SettingsClient() {
           Manage your account, financial profile, and preferences.
         </p>
       </div>
+
+      <AvatarSection name={user.name} />
 
       <AccountSection
         name={user.name}
