@@ -5,19 +5,33 @@ import { Report } from '@/models';
 import { jsonError, isValidObjectId, withErrorHandling } from '@/lib/api-helpers';
 import { renderReportPDF } from '@/lib/reports';
 
-export async function GET(_req: Request, { params }: { params: { id: string } }) {
+export async function GET(
+  _req: Request,
+  { params }: { params: { id: string } }
+) {
   return withErrorHandling(async () => {
     const userId = await requireUserId();
-    if (!isValidObjectId(params.id)) return jsonError(400, 'Invalid report ID.');
+
+    if (!isValidObjectId(params.id)) {
+      return jsonError(400, 'Invalid report ID.');
+    }
 
     await connectDB();
 
-    const report = await Report.findOne({ _id: params.id, userId });
-    if (!report) return jsonError(404, 'Report not found.');
+    const report = await Report.findOne({
+      _id: params.id,
+      userId,
+    });
+
+    if (!report) {
+      return jsonError(404, 'Report not found.');
+    }
 
     const pdfBuffer = await renderReportPDF(userId, report);
 
-    return new NextResponse(pdfBuffer, {
+   const pdfData = new Uint8Array(pdfBuffer);
+
+return new NextResponse(pdfData, {
       status: 200,
       headers: {
         'Content-Type': 'application/pdf',
