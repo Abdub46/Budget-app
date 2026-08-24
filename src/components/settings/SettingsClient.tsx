@@ -7,6 +7,7 @@ import PasswordSection from '@/components/settings/PasswordSection';
 import ProfileSection from '@/components/settings/ProfileSection';
 import FinancialSection from '@/components/settings/FinancialSection';
 import CategoriesSection from '@/components/settings/CategoriesSection';
+import BudgetGroupsSection from '@/components/settings/BudgetGroupsSection';
 import MonthlyReportsSection from '@/components/settings/MonthlyReportsSection';
 import NotificationsSection from '@/components/settings/NotificationsSection';
 import TelegramSection from '@/components/settings/TelegramSection';
@@ -95,6 +96,8 @@ export default function SettingsClient() {
         <CategoriesSection />
       </SectionWrapper>
 
+      <BudgetGroupsSection />
+
       <MonthlyReportsSection emailReportsEnabled={user.settings.emailReportsEnabled} />
 
       <NotificationsSection
@@ -103,7 +106,7 @@ export default function SettingsClient() {
         spendingAlerts={user.settings.notifications.spendingAlerts}
       />
 
-      <TelegramSection
+           <TelegramSection
   enabled={user.settings.telegram?.enabled ?? false}
   hasBotToken={user.settings.telegram?.hasBotToken ?? false}
   chatId={user.settings.telegram?.chatId ?? ''}

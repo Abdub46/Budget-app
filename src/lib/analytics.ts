@@ -1,8 +1,15 @@
 import { Types } from 'mongoose';
-import { MonthlyBudget, Expense } from '@/models';
+import { MonthlyBudget, Expense, Category } from '@/models';
 import type { CategoryType } from '@/types';
 import { computeBudgetComparison } from '@/lib/utils';
 import { enumerateMonths, toYearMonth, type MonthYear, type PeriodRange } from '@/lib/period';
+import {
+  effectiveBudgetGroup,
+  computeBudgetGroupBreakdown,
+  sumAmountsByGroup,
+  type BudgetGroupBreakdownEntry,
+  type BudgetGroupKey,
+} from '@/lib/budget-groups';
 
 export interface CategoryBreakdownEntry {
   category: CategoryType;
@@ -31,6 +38,7 @@ export interface PeriodAnalytics {
   monthsWithBudget: number;
   monthlySeries: MonthlySeriesPoint[];
   utilizationPercent: number;
+  budgetGroups: BudgetGroupBreakdownEntry[];
 }
 
 function monthDateRange(range: PeriodRange) {
@@ -47,12 +55,13 @@ export async function computePeriodAnalytics(
   const startYm = toYearMonth(range.start);
   const endYm = toYearMonth(range.end);
 
-  const [allBudgets, expenses] = await Promise.all([
+  const [allBudgets, expenses, categories] = await Promise.all([
     MonthlyBudget.find({
       userId,
       year: { $gte: range.start.year, $lte: range.end.year },
     }).lean(),
     Expense.find({ userId, date: { $gte: from, $lt: to } }).lean(),
+    Category.find({ userId }).select('type budgetGroup').lean(),
   ]);
 
   const budgetsInRange = allBudgets.filter((b) => {
@@ -102,6 +111,15 @@ export async function computePeriodAnalytics(
   const averageActualBudget =
     budgetsInRange.length > 0 ? totalBudget / budgetsInRange.length : 0;
 
+  const groupByCategoryId = new Map<string, BudgetGroupKey | null>(
+    categories.map((c) => [c._id.toString(), effectiveBudgetGroup(c)])
+  );
+  const amountByGroup = sumAmountsByGroup(
+    expenses.map((e) => ({ categoryId: e.categoryId.toString(), amount: e.amount })),
+    groupByCategoryId
+  );
+  const budgetGroups = computeBudgetGroupBreakdown(totalBudget, amountByGroup);
+
   return {
     totalBudget,
     totalExpenses,
@@ -115,6 +133,7 @@ export async function computePeriodAnalytics(
     monthsWithBudget: budgetsInRange.length,
     monthlySeries,
     utilizationPercent: totalBudget > 0 ? (totalExpenses / totalBudget) * 100 : 0,
+    budgetGroups,
   };
 }
 

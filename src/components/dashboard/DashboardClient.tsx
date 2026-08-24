@@ -12,8 +12,10 @@ import CategoryDonutChart from '@/components/dashboard/charts/CategoryDonutChart
 import CategoryHorizontalBarChart from '@/components/dashboard/charts/CategoryHorizontalBarChart';
 import SavingsAreaChart from '@/components/dashboard/charts/SavingsAreaChart';
 import UtilizationGauge from '@/components/dashboard/charts/UtilizationGauge';
+import BudgetRatioChart from '@/components/dashboard/charts/BudgetRatioChart';
 import type { PeriodPreset } from '@/types';
 import type { CategoryBreakdownEntry, MonthlySeriesPoint } from '@/lib/analytics';
+import type { BudgetGroupBreakdownEntry } from '@/lib/budget-groups';
 
 interface SummaryResponse {
   period: { preset: PeriodPreset; label: string };
@@ -30,6 +32,7 @@ interface SummaryResponse {
   averageActualBudget: number;
   monthlySeries: MonthlySeriesPoint[];
   utilizationPercent: number;
+  budgetGroups: BudgetGroupBreakdownEntry[];
 }
 
 interface CurrentMonthResponse {
@@ -39,6 +42,7 @@ interface CurrentMonthResponse {
   totalBudget?: number;
   averageMonthlyBudget: number;
   comparison?: { status: 'above' | 'below' | 'equal'; absDiff: number; percent: number };
+  budgetGroups?: BudgetGroupBreakdownEntry[];
 }
 
 export default function DashboardClient() {
@@ -121,6 +125,7 @@ export default function DashboardClient() {
           totalBudget={currentMonth.totalBudget}
           averageMonthlyBudget={currentMonth.averageMonthlyBudget}
           comparison={currentMonth.comparison}
+          budgetGroups={currentMonth.budgetGroups}
         />
       )}
 
@@ -157,6 +162,9 @@ export default function DashboardClient() {
               totalExpenses={summary.totalExpenses}
               currency={summary.currency}
             />
+            <div className="lg:col-span-2">
+              <BudgetRatioChart data={summary.budgetGroups} currency={summary.currency} />
+            </div>
           </div>
         </>
       ) : null}

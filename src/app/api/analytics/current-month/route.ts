@@ -1,9 +1,16 @@
 import { NextResponse } from 'next/server';
+import { Types } from 'mongoose';
 import { connectDB } from '@/lib/db';
 import { requireUserId } from '@/lib/session';
-import { MonthlyBudget, Expense, User } from '@/models';
+import { MonthlyBudget, Expense, Category, User } from '@/models';
 import { jsonError, withErrorHandling } from '@/lib/api-helpers';
 import { computeBudgetComparison, monthLabel } from '@/lib/utils';
+import {
+  effectiveBudgetGroup,
+  computeBudgetGroupBreakdown,
+  sumAmountsByGroup,
+  type BudgetGroupKey,
+} from '@/lib/budget-groups';
 
 export async function GET(req: Request) {
   return withErrorHandling(async () => {
@@ -36,15 +43,39 @@ export async function GET(req: Request) {
       });
     }
 
-    const totalExpenses = await Expense.aggregate([
-      {
-        $match: {
-          userId: budget.userId,
-          date: { $gte: new Date(year, month - 1, 1), $lt: new Date(year, month, 1) },
+    const [totalExpenses, expenseTotalsByCategory, categories] = await Promise.all([
+      Expense.aggregate([
+        {
+          $match: {
+            userId: budget.userId,
+            date: { $gte: new Date(year, month - 1, 1), $lt: new Date(year, month, 1) },
+          },
         },
-      },
-      { $group: { _id: null, total: { $sum: '$amount' } } },
-    ]).then((r) => r[0]?.total ?? 0);
+        { $group: { _id: null, total: { $sum: '$amount' } } },
+      ]).then((r) => r[0]?.total ?? 0),
+      Expense.aggregate([
+        {
+          $match: {
+            userId: budget.userId,
+            date: { $gte: new Date(year, month - 1, 1), $lt: new Date(year, month, 1) },
+          },
+        },
+        { $group: { _id: '$categoryId', total: { $sum: '$amount' } } },
+      ]),
+      Category.find({ userId }).select('type budgetGroup').lean(),
+    ]);
+
+    const groupByCategoryId = new Map<string, BudgetGroupKey | null>(
+      categories.map((c) => [c._id.toString(), effectiveBudgetGroup(c)])
+    );
+    const amountByGroup = sumAmountsByGroup(
+      expenseTotalsByCategory.map((r: { _id: Types.ObjectId; total: number }) => ({
+        categoryId: r._id.toString(),
+        amount: r.total,
+      })),
+      groupByCategoryId
+    );
+    const budgetGroups = computeBudgetGroupBreakdown(budget.totalBudget, amountByGroup);
 
     return NextResponse.json({
       label: monthLabel(month, year),
@@ -59,6 +90,7 @@ export async function GET(req: Request) {
         budget.totalBudget > 0 ? Math.round((totalExpenses / budget.totalBudget) * 1000) / 10 : 0,
       averageMonthlyBudget,
       comparison: computeBudgetComparison(budget.totalBudget, averageMonthlyBudget),
+      budgetGroups,
     });
   });
 }

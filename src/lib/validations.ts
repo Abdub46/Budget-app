@@ -102,6 +102,10 @@ export const categorySchema = z.object({
   name: freeText(60).pipe(z.string().min(1, 'Name is required')),
   type: categoryTypeEnum,
   icon: z.string().trim().min(1).default('circle'),
+  // Omitted -> leave unchanged (or, on create, "not yet customized"; see
+  // effectiveBudgetGroup's fallback-by-type). Explicit `null` -> the user
+  // removed this category from any group.
+  budgetGroup: z.enum(['needs', 'wants', 'savings']).nullable().optional(),
 });
 
 export const profileUpdateSchema = z.object({

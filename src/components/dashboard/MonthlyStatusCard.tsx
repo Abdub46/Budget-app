@@ -2,10 +2,11 @@
 
 import { useState } from 'react';
 import { motion } from 'framer-motion';
-import { TrendingUp, TrendingDown, CheckCircle2, PlusCircle, Eye, EyeOff } from 'lucide-react';
+import { TrendingUp, TrendingDown, CheckCircle2, PlusCircle, Eye, EyeOff, Target } from 'lucide-react';
 import Link from 'next/link';
 import { formatCurrency, formatPercent } from '@/lib/utils';
 import { Button } from '@/components/ui/Button';
+import type { BudgetGroupBreakdownEntry } from '@/lib/budget-groups';
 
 interface MonthlyStatusCardProps {
   label: string;
@@ -14,6 +15,7 @@ interface MonthlyStatusCardProps {
   totalBudget?: number;
   averageMonthlyBudget: number;
   comparison?: { status: 'above' | 'below' | 'equal'; absDiff: number; percent: number };
+  budgetGroups?: BudgetGroupBreakdownEntry[];
 }
 
 const STATUS_CONFIG = {
@@ -41,6 +43,7 @@ export default function MonthlyStatusCard({
   totalBudget,
   averageMonthlyBudget,
   comparison,
+  budgetGroups,
 }: MonthlyStatusCardProps) {
   const [isHidden, setIsHidden] = useState(false);
 
@@ -106,6 +109,43 @@ export default function MonthlyStatusCard({
       <p className="mt-3 text-xs text-muted-foreground">
         Average monthly budget: {formatCurrency(averageMonthlyBudget, currency)}
       </p>
+
+      {budgetGroups && budgetGroups.length > 0 && (
+        <div className="mt-4 border-t border-border pt-3">
+          <p className="flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+            <Target className="h-3.5 w-3.5" />
+            50/30/20 Ratio
+          </p>
+          {(() => {
+            const belowTarget = budgetGroups.filter((g) => g.status === 'below');
+            if (belowTarget.length === 0) {
+              return (
+                <p className="mt-2 flex items-center gap-1.5 text-xs text-success">
+                  <CheckCircle2 className="h-3.5 w-3.5" />
+                  All categories have reached their target ratio.
+                </p>
+              );
+            }
+            return (
+              <ul className="mt-2 space-y-1.5">
+                {belowTarget.map((g) => (
+                  <li key={g.key} className="flex items-center justify-between gap-3 text-xs">
+                    <span className="text-muted-foreground">
+                      {g.label}{' '}
+                      <span className="text-foreground font-medium">
+                        ({formatPercent(g.actualPercent)} of {g.targetPercent}%)
+                      </span>
+                    </span>
+                    <span className="whitespace-nowrap font-medium text-warning-dark">
+                      {formatCurrency(g.remainingToTarget, currency)} to go
+                    </span>
+                  </li>
+                ))}
+              </ul>
+            );
+          })()}
+        </div>
+      )}
     </motion.div>
   );
 }
