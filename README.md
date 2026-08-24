@@ -25,7 +25,7 @@ OpenAI-compatible AI Financial Assistant.
    | `NEXTAUTH_SECRET` | `openssl rand -base64 32` |
    | `RESEND_API_KEY`, `EMAIL_FROM` | From [resend.com](https://resend.com), for monthly PDF emails |
    | `AI_API_KEY`, `AI_API_BASE_URL`, `AI_MODEL` | Any OpenAI-compatible provider, for the AI Financial Assistant |
-   | `CRON_SECRET` | Random string authorizing `/api/cron/month-end` |
+   | `CRON_SECRET` | Random string authorizing `/api/cron/month-end` and `/api/cron/expense-reminder` |
    | `NEXT_PUBLIC_APP_URL` | App URL, used in a couple of client-side links |
    | `UPSTASH_REDIS_REST_URL`, `UPSTASH_REDIS_REST_TOKEN` | Optional for local dev (falls back to in-memory), required in production — from [console.upstash.com](https://console.upstash.com/), used for rate limiting |
 
@@ -43,11 +43,14 @@ OpenAI-compatible AI Financial Assistant.
 1. Push this repo to GitHub/GitLab, import it into Vercel.
 2. Add all variables from `.env.example` as Vercel Environment Variables.
 3. `vercel.json` already schedules `/api/cron/month-end` for 06:00 UTC on
-   the 1st of each month via Vercel Cron — no extra setup needed once
-   `CRON_SECRET` is set as an env var.
-4. If you're **not** on Vercel, run `npm run cron:month-end` from any
-   scheduler (system crontab, GitHub Actions, etc.) — it shares the exact
-   same report-generation logic as the hosted cron route.
+   the 1st of each month, and `/api/cron/expense-reminder` daily at 09:00
+   UTC, both via Vercel Cron — no extra setup needed once `CRON_SECRET` is
+   set as an env var. (Telegram reminders only actually go out to users who
+   enabled them and saved a bot token + chat ID under Settings.)
+4. If you're **not** on Vercel, run `npm run cron:month-end` and
+   `npm run cron:expense-reminder` from any scheduler (system crontab,
+   GitHub Actions, etc.) — each shares the exact same logic as its hosted
+   cron route.
 
 ## Tech stack
 
@@ -102,8 +105,14 @@ scripts/
       Resend with a short in-body summary, report history with
       view/download/resend, month-end job with duplicate prevention
       (unique DB index + idempotent generation)
+- [x] Telegram reminders: per-user bot token + chat ID (Settings →
+      Telegram Reminders), a toggle to enable/disable, a "send test
+      message" check, and a daily job that messages anyone whose expenses
+      haven't been updated in 24+ hours (never more than once per 24h
+      window per user)
 - [x] Settings: Account, Personal Profile, Financial Profile, Categories,
-      Monthly Reports, Notifications, Appearance (light/dark/system)
+      Monthly Reports, Notifications, Telegram Reminders, Appearance
+      (light/dark/system)
 - [x] Security: server-side ownership checks on every query, Zod validation
       everywhere, bcrypt hashing, rate limiting, input sanitization, secure
       cookies (via NextAuth), security headers, DB indexes — see

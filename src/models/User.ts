@@ -9,6 +9,15 @@ export interface IUserSettings {
     spendingAlerts: boolean;
   };
   appearance: 'light' | 'dark' | 'system';
+  telegram: {
+    enabled: boolean;
+    botToken?: string;
+    chatId?: string;
+    // Set after each reminder send so the cron job (which may run more
+    // often than once/24h in some deployments) never double-sends within
+    // the same 24-hour window.
+    lastReminderSentAt?: Date;
+  };
 }
 
 export interface IUser {
@@ -55,6 +64,16 @@ const UserSettingsSchema = new Schema<IUserSettings>(
       type: String,
       enum: ['light', 'dark', 'system'],
       default: 'system',
+    },
+    telegram: {
+      enabled: { type: Boolean, default: false },
+      // A Telegram bot token is a credential (equivalent to a password —
+      // it grants send/read access to whatever chat it's paired with), so
+      // it's never returned in full by the settings API after it's saved;
+      // see src/app/api/settings/route.ts and .../settings/telegram/route.ts.
+      botToken: { type: String, trim: true, maxlength: 200, default: undefined },
+      chatId: { type: String, trim: true, maxlength: 100, default: undefined },
+      lastReminderSentAt: { type: Date, default: undefined },
     },
   },
   { _id: false }

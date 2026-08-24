@@ -162,6 +162,19 @@ export const notificationSettingsSchema = z.object({
   appearance: z.enum(['light', 'dark', 'system']),
 });
 
+/**
+ * All fields optional/independent — the client only sends what actually
+ * changed (e.g. just `{ enabled: true }` when flipping the toggle, or just
+ * `{ botToken: '...' }` when saving a new token without touching the rest).
+ * An empty string for botToken/chatId means "clear this field", so it's
+ * distinguished from `undefined` ("leave unchanged") rather than trimmed away.
+ */
+export const telegramSettingsSchema = z.object({
+  enabled: z.boolean().optional(),
+  botToken: z.string().trim().max(200, 'That token looks too long.').optional(),
+  chatId: z.string().trim().max(100, 'That chat ID looks too long.').optional(),
+});
+
 export const aiChatSchema = z.object({
   messages: z
     .array(

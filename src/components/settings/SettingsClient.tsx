@@ -9,6 +9,7 @@ import FinancialSection from '@/components/settings/FinancialSection';
 import CategoriesSection from '@/components/settings/CategoriesSection';
 import MonthlyReportsSection from '@/components/settings/MonthlyReportsSection';
 import NotificationsSection from '@/components/settings/NotificationsSection';
+import TelegramSection from '@/components/settings/TelegramSection';
 import AppearanceSection from '@/components/settings/AppearanceSection';
 
 interface SettingsUser {
@@ -28,6 +29,7 @@ interface SettingsUser {
     emailReportsEnabled: boolean;
     notifications: { budgetWarnings: boolean; monthlyReports: boolean; spendingAlerts: boolean };
     appearance: 'light' | 'dark' | 'system';
+    telegram: { enabled: boolean; hasBotToken: boolean; chatId: string };
   };
 }
 
@@ -99,6 +101,12 @@ export default function SettingsClient() {
         budgetWarnings={user.settings.notifications.budgetWarnings}
         monthlyReports={user.settings.notifications.monthlyReports}
         spendingAlerts={user.settings.notifications.spendingAlerts}
+      />
+
+      <TelegramSection
+        enabled={user.settings.telegram.enabled}
+        hasBotToken={user.settings.telegram.hasBotToken}
+        chatId={user.settings.telegram.chatId}
       />
 
       <AppearanceSection initial={user.settings.appearance} />

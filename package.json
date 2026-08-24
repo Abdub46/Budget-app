@@ -8,7 +8,8 @@
     "start": "next start",
     "lint": "next lint",
     "seed:categories": "tsx scripts/seed-categories.ts",
-    "cron:month-end": "tsx scripts/month-end.ts"
+    "cron:month-end": "tsx scripts/month-end.ts",
+    "cron:expense-reminder": "tsx scripts/expense-reminder.ts"
   },
   "dependencies": {
     "@hookform/resolvers": "^3.9.0",
