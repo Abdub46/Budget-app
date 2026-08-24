@@ -8,10 +8,12 @@ import { Button } from '@/components/ui/Button';
 import Toggle from '@/components/ui/Toggle';
 import SettingsSection from '@/components/settings/SettingsSection';
 
+
+
 interface TelegramSectionProps {
   enabled: boolean;
   hasBotToken: boolean;
-  chatId: string;
+  chatId?: string | null;
 }
 
 export default function TelegramSection({
@@ -22,14 +24,24 @@ export default function TelegramSection({
   const [enabled, setEnabled] = useState(initialEnabled);
   const [tokenSaved, setTokenSaved] = useState(hasBotToken);
   const [botTokenInput, setBotTokenInput] = useState('');
-  const [chatId, setChatId] = useState(initialChatId);
-  const [savedChatId, setSavedChatId] = useState(initialChatId);
+  const [chatId, setChatId] = useState(initialChatId ?? '');
+  const [savedChatId, setSavedChatId] = useState(initialChatId ?? '');
   const [isSaving, setIsSaving] = useState(false);
   const [isTesting, setIsTesting] = useState(false);
 
-  const hasUnsavedChanges = botTokenInput.trim() !== '' || chatId.trim() !== savedChatId.trim();
-  const canEnable = tokenSaved && savedChatId.trim().length > 0;
+  const hasUnsavedChanges =
+    botTokenInput.trim() !== '' ||
+    chatId.trim() !== savedChatId.trim();
+
+  const canEnable =
+    tokenSaved && savedChatId.trim().length > 0;
+
   const canTest = canEnable && !hasUnsavedChanges;
+
+
+
+
+
 
   const handleSave = async () => {
     setIsSaving(true);

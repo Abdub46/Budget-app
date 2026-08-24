@@ -104,10 +104,10 @@ export default function SettingsClient() {
       />
 
       <TelegramSection
-        enabled={user.settings.telegram.enabled}
-        hasBotToken={user.settings.telegram.hasBotToken}
-        chatId={user.settings.telegram.chatId}
-      />
+  enabled={user.settings.telegram?.enabled ?? false}
+  hasBotToken={user.settings.telegram?.hasBotToken ?? false}
+  chatId={user.settings.telegram?.chatId ?? ''}
+/>
 
       <AppearanceSection initial={user.settings.appearance} />
     </div>

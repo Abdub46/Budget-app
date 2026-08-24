@@ -20,7 +20,12 @@ export async function GET() {
       ...user,
       settings: {
         ...user.settings,
-        telegram: { ...telegramRest, hasBotToken: !!botToken },
+
+        telegram: {
+  ...telegramRest,
+  chatId: telegramRest.chatId ?? '',
+  hasBotToken: !!botToken,
+},
       },
     };
 
