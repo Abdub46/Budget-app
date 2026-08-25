@@ -2,7 +2,7 @@
 
 import { motion } from 'framer-motion';
 import {
-  Wallet, Receipt, PiggyBank, TrendingUp, TrendingDown,
+  Receipt, PiggyBank, TrendingUp,
   ArrowUpCircle, ArrowDownCircle, Scale,
 } from 'lucide-react';
 import { formatCurrency } from '@/lib/utils';
@@ -35,13 +35,13 @@ export default function SummaryStats({
   averageActualBudget,
 }: SummaryStatsProps) {
   const stats = [
-    { label: 'Total Budget', value: formatCurrency(totalBudget, currency), icon: Wallet },
     { label: 'Total Expenses', value: formatCurrency(totalExpenses, currency), icon: Receipt },
     {
       label: 'Remaining',
       value: formatCurrency(remaining, currency),
       icon: Scale,
       negative: remaining < 0,
+      standout: true,
     },
     {
       label: 'Savings & Investments',
@@ -66,12 +66,6 @@ export default function SummaryStats({
       sub: 'Your registered baseline',
       icon: TrendingUp,
     },
-    {
-      label: 'Average Actual Budget',
-      value: formatCurrency(averageActualBudget, currency),
-      sub: 'Across the selected period',
-      icon: TrendingDown,
-    },
   ];
 
   return (
@@ -90,7 +84,11 @@ export default function SummaryStats({
           </div>
           <p
             className={`mt-2 text-lg font-semibold truncate ${
-              (stat as any).negative ? 'text-danger' : 'text-foreground'
+              (stat as any).negative
+                ? 'text-danger'
+                : (stat as any).standout
+                  ? 'text-primary'
+                  : 'text-foreground'
             }`}
           >
             {stat.value}
