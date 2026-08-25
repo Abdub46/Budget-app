@@ -6,7 +6,12 @@ const freeText = (max: number) =>
 const optionalFreeText = (max: number) =>
   z.string().trim().max(max).transform(sanitizeText).optional().or(z.literal(''));
 
-export const employmentStatusEnum = z.enum(['employed', 'self-employed', 'student']);
+export const employmentStatusEnum = z.enum(['employed', 'self-employed', 'student', 'other']);
+
+export const incomeStabilityEnum = z.enum(['stable', 'variable', 'unstable']);
+
+const nonNegativeAmount = (label: string) =>
+  z.coerce.number({ invalid_type_error: `Enter ${label}` }).min(0, 'Amount cannot be negative').max(1_000_000_000);
 
 export const categoryTypeEnum = z.enum([
   'food', 'transport', 'rent', 'utilities', 'savings', 'investment',
@@ -54,6 +59,23 @@ export const registerSchema = z
       .number({ invalid_type_error: 'Enter your average monthly budget' })
       .min(0, 'Amount cannot be negative')
       .max(1_000_000_000, 'Enter a realistic amount'),
+
+    // --- AI budgeting engine inputs (spec §3) — all optional/default so a
+    // user can still register even with incomplete financial details; the
+    // engine gracefully lowers its confidence level when data is missing
+    // rather than requiring everything up front. ---
+    monthlyIncome: nonNegativeAmount('your monthly income').default(0),
+    housingExpense: nonNegativeAmount('your housing/rent expense').default(0),
+    foodExpense: nonNegativeAmount('your food expense').default(0),
+    transportExpense: nonNegativeAmount('your transport expense').default(0),
+    utilitiesExpense: nonNegativeAmount('your utilities expense').default(0),
+    debtPayment: nonNegativeAmount('your debt/loan payments').default(0),
+    currentSavings: nonNegativeAmount('your current savings').default(0),
+    emergencyFund: nonNegativeAmount('your emergency fund').default(0),
+    dependents: z.coerce.number().int().min(0).max(50).default(0),
+    incomeStability: incomeStabilityEnum.default('stable'),
+    financialGoal: optionalFreeText(240),
+    savingsGoal: optionalFreeText(240),
   })
   .superRefine((data, ctx) => {
     if (data.employmentStatus === 'employed' && !data.employmentPlace?.trim()) {
@@ -123,7 +145,41 @@ export const profileUpdateSchema = z.object({
 export const financialProfileSchema = z.object({
   averageMonthlyBudget: z.coerce.number().min(0).max(1_000_000_000),
   currency: z.string().trim().length(3),
+  monthlyIncome: nonNegativeAmount('monthly income').optional(),
+  housingExpense: nonNegativeAmount('housing expense').optional(),
+  foodExpense: nonNegativeAmount('food expense').optional(),
+  transportExpense: nonNegativeAmount('transport expense').optional(),
+  utilitiesExpense: nonNegativeAmount('utilities expense').optional(),
+  debtPayment: nonNegativeAmount('debt payment').optional(),
+  currentSavings: nonNegativeAmount('current savings').optional(),
+  emergencyFund: nonNegativeAmount('emergency fund').optional(),
+  dependents: z.coerce.number().int().min(0).max(50).optional(),
+  incomeStability: incomeStabilityEnum.optional(),
+  financialGoal: optionalFreeText(240),
+  savingsGoal: optionalFreeText(240),
 });
+
+/**
+ * The three percentages must sum to exactly 100 (spec §1) — validated here
+ * AND at the model layer (BudgetStrategy's pre-validate hook) as a hard
+ * backstop.
+ */
+export const budgetStrategyOverrideSchema = z
+  .object({
+    needsPercent: z.coerce.number().min(0).max(100),
+    wantsPercent: z.coerce.number().min(0).max(100),
+    savingsPercent: z.coerce.number().min(0).max(100),
+  })
+  .superRefine((data, ctx) => {
+    const total = data.needsPercent + data.wantsPercent + data.savingsPercent;
+    if (Math.round(total) !== 100) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        path: ['needsPercent'],
+        message: `Needs, Wants, and Savings must add up to 100% (currently ${total}%).`,
+      });
+    }
+  });
 
 /**
  * Avatar is uploaded as a data URI (resized/compressed to a small JPEG or

@@ -78,5 +78,20 @@ export function generateInsights(context: FinancialContext): string[] {
     }
   }
 
+  // 6. AI budget strategy vs. actual — only meaningful once a budget exists.
+  if (context.currentMonth.totalBudget > 0) {
+    const exceeded = context.currentMonth.budgetGroups.filter((g) => g.status === 'exceeded');
+    if (exceeded.length > 0) {
+      insights.push(
+        `Your ${exceeded.map((g) => g.label).join(' and ')} spending is above your ${
+          context.budgetStrategy.source === 'ai' ? 'AI-recommended' : 'custom'
+        } allocation of ${exceeded.map((g) => `${g.targetPercent}%`).join(' / ')}.`
+      );
+    }
+  }
+
+  // 7. Budget health
+  insights.push(`Budget health: ${context.currentMonth.budgetHealth.label} — ${context.currentMonth.budgetHealth.explanation}`);
+
   return insights;
 }

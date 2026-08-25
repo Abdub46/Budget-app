@@ -29,6 +29,16 @@ export interface IReport {
     totalInvestments: number;
     savingsDestinations: string[];
     insights: string[];
+    // AI budget allocation in effect for this month — powers the PDF's
+    // "Budget Allocation" section and the AI assessment line in the email.
+    budgetStrategy?: {
+      needsPercent: number;
+      wantsPercent: number;
+      savingsPercent: number;
+      source: 'ai' | 'custom';
+      reasoning: string;
+    };
+    budgetHealth?: { status: string; label: string; explanation: string };
   };
   createdAt: Date;
   updatedAt: Date;
@@ -75,6 +85,20 @@ const ReportSchema = new Schema<IReport>(
       totalInvestments: { type: Number, required: true, default: 0 },
       savingsDestinations: [{ type: String }],
       insights: [{ type: String }],
+      budgetStrategy: {
+        needsPercent: Number,
+        wantsPercent: Number,
+        savingsPercent: Number,
+        source: { type: String, enum: ['ai', 'custom'] },
+        reasoning: String,
+        _id: false,
+      },
+      budgetHealth: {
+        status: String,
+        label: String,
+        explanation: String,
+        _id: false,
+      },
     },
   },
   { timestamps: true }

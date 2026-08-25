@@ -46,7 +46,7 @@ export default function BudgetRatioChart({
     .join(' ');
 
   return (
-    <ChartCard title="Budget Ratio (50/30/20)" accessibleSummary={accessibleSummary}>
+    <ChartCard title="Budget Ratio (Your Allocation)" accessibleSummary={accessibleSummary}>
       <div className="space-y-5">
         {data.map((group) => {
           const { barColor, badge, icon: Icon, text } = STATUS_STYLES[group.status];

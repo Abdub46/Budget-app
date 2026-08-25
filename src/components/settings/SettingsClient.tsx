@@ -19,13 +19,25 @@ interface SettingsUser {
   phone: string;
   currency: string;
   averageMonthlyBudget: number;
-  employmentStatus: 'employed' | 'self-employed' | 'student';
+  employmentStatus: 'employed' | 'self-employed' | 'student' | 'other';
   employmentPlace?: string;
   position?: string;
   businessName?: string;
   occupation?: string;
   institution?: string;
   course?: string;
+  monthlyIncome?: number;
+  housingExpense?: number;
+  foodExpense?: number;
+  transportExpense?: number;
+  utilitiesExpense?: number;
+  debtPayment?: number;
+  currentSavings?: number;
+  emergencyFund?: number;
+  dependents?: number;
+  incomeStability?: 'stable' | 'variable' | 'unstable';
+  financialGoal?: string;
+  savingsGoal?: string;
   settings: {
     emailReportsEnabled: boolean;
     notifications: { budgetWarnings: boolean; monthlyReports: boolean; spendingAlerts: boolean };
@@ -89,6 +101,18 @@ export default function SettingsClient() {
       <FinancialSection
         averageMonthlyBudget={user.averageMonthlyBudget}
         currency={user.currency}
+        monthlyIncome={user.monthlyIncome}
+        housingExpense={user.housingExpense}
+        foodExpense={user.foodExpense}
+        transportExpense={user.transportExpense}
+        utilitiesExpense={user.utilitiesExpense}
+        debtPayment={user.debtPayment}
+        currentSavings={user.currentSavings}
+        emergencyFund={user.emergencyFund}
+        dependents={user.dependents}
+        incomeStability={user.incomeStability}
+        financialGoal={user.financialGoal}
+        savingsGoal={user.savingsGoal}
         onSaved={(updated) => setUser((u) => (u ? { ...u, ...updated } : u))}
       />
 

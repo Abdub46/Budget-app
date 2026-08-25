@@ -1,4 +1,12 @@
-export type EmploymentStatus = 'employed' | 'self-employed' | 'student';
+export type EmploymentStatus = 'employed' | 'self-employed' | 'student' | 'other';
+
+export type IncomeStability = 'stable' | 'variable' | 'unstable';
+
+export const INCOME_STABILITY_OPTIONS: Array<{ value: IncomeStability; label: string }> = [
+  { value: 'stable', label: 'Stable — regular, predictable income' },
+  { value: 'variable', label: 'Variable — income fluctuates month to month' },
+  { value: 'unstable', label: 'Unstable — irregular or unreliable income' },
+];
 
 export type CategoryType =
   | 'food'

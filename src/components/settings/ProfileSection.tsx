@@ -67,6 +67,7 @@ export default function ProfileSection(props: ProfileSectionProps) {
           <option value="employed">Employed</option>
           <option value="self-employed">Self-employed</option>
           <option value="student">Student</option>
+          <option value="other">Other</option>
         </Select>
 
         <AnimatePresence mode="wait">

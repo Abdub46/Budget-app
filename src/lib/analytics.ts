@@ -49,7 +49,8 @@ function monthDateRange(range: PeriodRange) {
 
 export async function computePeriodAnalytics(
   userId: string | Types.ObjectId,
-  range: PeriodRange
+  range: PeriodRange,
+  targetPercentByGroup?: Record<BudgetGroupKey, number>
 ): Promise<PeriodAnalytics> {
   const { from, to } = monthDateRange(range);
   const startYm = toYearMonth(range.start);
@@ -118,7 +119,7 @@ export async function computePeriodAnalytics(
     expenses.map((e) => ({ categoryId: e.categoryId.toString(), amount: e.amount })),
     groupByCategoryId
   );
-  const budgetGroups = computeBudgetGroupBreakdown(totalBudget, amountByGroup);
+  const budgetGroups = computeBudgetGroupBreakdown(totalBudget, amountByGroup, targetPercentByGroup);
 
   return {
     totalBudget,

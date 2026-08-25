@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import { connectDB } from '@/lib/db';
 import { MonthlyBudget, Report, User } from '@/models';
 import { generateAndSendMonthlyReport } from '@/lib/reports';
+import { reassessStrategy } from '@/lib/budget-engine';
 import { shiftMonths, type MonthYear } from '@/lib/period';
 
 /**
@@ -66,6 +67,15 @@ async function handleMonthEndRun(req: Request) {
       }
 
       await generateAndSendMonthlyReport(user._id, target);
+
+      // New budgeting cycle starting — spec §6: reassess the AI strategy at
+      // the beginning of each new month. The report just generated above
+      // still reflects the strategy that was active during `target`, since
+      // this reassessment only runs after the snapshot is built.
+      await reassessStrategy(user._id).catch((err) =>
+        console.error(`Month-end strategy reassessment failed for user ${user._id}:`, err)
+      );
+
       results.push({ userId: user._id.toString(), status: 'sent' });
     } catch (err: any) {
       console.error(`Month-end report failed for user ${user._id}:`, err);

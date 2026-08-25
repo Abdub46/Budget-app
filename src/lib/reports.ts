@@ -70,6 +70,18 @@ export async function buildReportSnapshot(
     totalInvestments: currentMonth.totalInvestments,
     savingsDestinations,
     insights: generateInsights(context),
+    budgetStrategy: {
+      needsPercent: context.budgetStrategy.needsPercent,
+      wantsPercent: context.budgetStrategy.wantsPercent,
+      savingsPercent: context.budgetStrategy.savingsPercent,
+      source: context.budgetStrategy.source as 'ai' | 'custom',
+      reasoning: context.budgetStrategy.reasoning,
+    },
+    budgetHealth: {
+      status: currentMonth.budgetHealth.status,
+      label: currentMonth.budgetHealth.label,
+      explanation: currentMonth.budgetHealth.explanation,
+    },
   };
 }
 

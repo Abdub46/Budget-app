@@ -9,8 +9,11 @@ import {
   effectiveBudgetGroup,
   computeBudgetGroupBreakdown,
   sumAmountsByGroup,
+  targetPercentsFromStrategy,
   type BudgetGroupKey,
 } from '@/lib/budget-groups';
+import { ensureStrategy } from '@/lib/budget-engine';
+import { computeBudgetHealth } from '@/lib/budget-health';
 
 export async function GET(req: Request) {
   return withErrorHandling(async () => {
@@ -35,11 +38,13 @@ export async function GET(req: Request) {
     const currency = user?.currency ?? 'KES';
 
     if (!budget) {
+      const strategy = await ensureStrategy(userId);
       return NextResponse.json({
         label: monthLabel(month, year),
         currency,
         hasBudget: false,
         averageMonthlyBudget,
+        budgetStrategy: strategy,
       });
     }
 
@@ -75,7 +80,16 @@ export async function GET(req: Request) {
       })),
       groupByCategoryId
     );
-    const budgetGroups = computeBudgetGroupBreakdown(budget.totalBudget, amountByGroup);
+
+    const strategy = await ensureStrategy(userId);
+    const budgetGroups = computeBudgetGroupBreakdown(
+      budget.totalBudget,
+      amountByGroup,
+      targetPercentsFromStrategy(strategy)
+    );
+    const utilizationPercent =
+      budget.totalBudget > 0 ? Math.round((totalExpenses / budget.totalBudget) * 1000) / 10 : 0;
+    const budgetHealth = computeBudgetHealth(utilizationPercent, budgetGroups, currency);
 
     return NextResponse.json({
       label: monthLabel(month, year),
@@ -86,11 +100,12 @@ export async function GET(req: Request) {
       totalAdditionalAmount: budget.totalAdditionalAmount,
       totalExpenses,
       remaining: budget.totalBudget - totalExpenses,
-      utilizationPercent:
-        budget.totalBudget > 0 ? Math.round((totalExpenses / budget.totalBudget) * 1000) / 10 : 0,
+      utilizationPercent,
       averageMonthlyBudget,
       comparison: computeBudgetComparison(budget.totalBudget, averageMonthlyBudget),
       budgetGroups,
+      budgetHealth,
+      budgetStrategy: strategy,
     });
   });
 }

@@ -1,5 +1,5 @@
 import { Schema, model, models, Model, Types } from 'mongoose';
-import type { EmploymentStatus } from '@/types';
+import type { EmploymentStatus, IncomeStability } from '@/types';
 
 export interface IUserSettings {
   emailReportsEnabled: boolean;
@@ -45,6 +45,22 @@ export interface IUser {
   course?: string;
 
   averageMonthlyBudget: number;
+
+  // --- AI budgeting engine inputs, collected at onboarding and editable
+  // later under Settings -> Financial Profile. All optional/default 0 so
+  // existing users from before this field set was added are unaffected. ---
+  monthlyIncome: number; // may differ from averageMonthlyBudget (income vs. what's actually budgeted)
+  housingExpense: number;
+  foodExpense: number;
+  transportExpense: number;
+  utilitiesExpense: number;
+  debtPayment: number;
+  currentSavings: number;
+  emergencyFund: number;
+  dependents: number;
+  incomeStability: IncomeStability;
+  financialGoal?: string;
+  savingsGoal?: string;
 
   settings: IUserSettings;
 
@@ -102,7 +118,7 @@ const UserSchema = new Schema<IUser>(
 
     employmentStatus: {
       type: String,
-      enum: ['employed', 'self-employed', 'student'],
+      enum: ['employed', 'self-employed', 'student', 'other'],
       required: true,
     },
 
@@ -119,6 +135,23 @@ const UserSchema = new Schema<IUser>(
     course: { type: String, trim: true, default: undefined },
 
     averageMonthlyBudget: { type: Number, required: true, min: 0, default: 0 },
+
+    monthlyIncome: { type: Number, min: 0, default: 0 },
+    housingExpense: { type: Number, min: 0, default: 0 },
+    foodExpense: { type: Number, min: 0, default: 0 },
+    transportExpense: { type: Number, min: 0, default: 0 },
+    utilitiesExpense: { type: Number, min: 0, default: 0 },
+    debtPayment: { type: Number, min: 0, default: 0 },
+    currentSavings: { type: Number, min: 0, default: 0 },
+    emergencyFund: { type: Number, min: 0, default: 0 },
+    dependents: { type: Number, min: 0, default: 0 },
+    incomeStability: {
+      type: String,
+      enum: ['stable', 'variable', 'unstable'],
+      default: 'stable',
+    },
+    financialGoal: { type: String, trim: true, maxlength: 240, default: undefined },
+    savingsGoal: { type: String, trim: true, maxlength: 240, default: undefined },
 
     settings: { type: UserSettingsSchema, default: () => ({}) },
   },

@@ -13,6 +13,7 @@ import 'dotenv/config';
 import { connectDB } from '../src/lib/db';
 import { MonthlyBudget, Report, User } from '../src/models';
 import { generateAndSendMonthlyReport } from '../src/lib/reports';
+import { reassessStrategy } from '../src/lib/budget-engine';
 import { shiftMonths, type MonthYear } from '../src/lib/period';
 
 async function run() {
@@ -47,6 +48,9 @@ async function run() {
       }
 
       await generateAndSendMonthlyReport(user._id, target);
+      await reassessStrategy(user._id).catch((err) =>
+        console.error(`Strategy reassessment failed for user ${user._id}:`, err)
+      );
       sent++;
     } catch (err) {
       console.error(`Failed for user ${user._id}:`, err);

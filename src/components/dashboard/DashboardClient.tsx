@@ -13,6 +13,8 @@ import CategoryHorizontalBarChart from '@/components/dashboard/charts/CategoryHo
 import SavingsAreaChart from '@/components/dashboard/charts/SavingsAreaChart';
 import UtilizationGauge from '@/components/dashboard/charts/UtilizationGauge';
 import BudgetRatioChart from '@/components/dashboard/charts/BudgetRatioChart';
+import BudgetStrategyCard, { type BudgetStrategy } from '@/components/dashboard/BudgetStrategyCard';
+import BudgetHealthCard, { type BudgetHealth } from '@/components/dashboard/BudgetHealthCard';
 import type { PeriodPreset } from '@/types';
 import type { CategoryBreakdownEntry, MonthlySeriesPoint } from '@/lib/analytics';
 import type { BudgetGroupBreakdownEntry } from '@/lib/budget-groups';
@@ -33,6 +35,8 @@ interface SummaryResponse {
   monthlySeries: MonthlySeriesPoint[];
   utilizationPercent: number;
   budgetGroups: BudgetGroupBreakdownEntry[];
+  budgetHealth: BudgetHealth;
+  budgetStrategy: BudgetStrategy;
 }
 
 interface CurrentMonthResponse {
@@ -43,6 +47,7 @@ interface CurrentMonthResponse {
   averageMonthlyBudget: number;
   comparison?: { status: 'above' | 'below' | 'equal'; absDiff: number; percent: number };
   budgetGroups?: BudgetGroupBreakdownEntry[];
+  budgetStrategy?: BudgetStrategy;
 }
 
 export default function DashboardClient() {
@@ -55,11 +60,15 @@ export default function DashboardClient() {
   const [summary, setSummary] = useState<SummaryResponse | null>(null);
   const [currentMonth, setCurrentMonth] = useState<CurrentMonthResponse | null>(null);
   const [loading, setLoading] = useState(true);
+  const [strategy, setStrategy] = useState<BudgetStrategy | null>(null);
 
   const loadCurrentMonth = useCallback(async () => {
     const res = await fetch('/api/analytics/current-month');
     const result = await res.json();
-    if (res.ok) setCurrentMonth(result);
+    if (res.ok) {
+      setCurrentMonth(result);
+      if (result.budgetStrategy) setStrategy(result.budgetStrategy);
+    }
   }, []);
 
   const loadSummary = useCallback(async () => {
@@ -128,6 +137,15 @@ export default function DashboardClient() {
           budgetGroups={currentMonth.budgetGroups}
         />
       )}
+
+      <div className="grid lg:grid-cols-3 gap-5 items-start">
+        {strategy && (
+          <div className="lg:col-span-2">
+            <BudgetStrategyCard strategy={strategy} onUpdated={setStrategy} />
+          </div>
+        )}
+        {summary?.budgetHealth && <BudgetHealthCard health={summary.budgetHealth} />}
+      </div>
 
       {loading && !summary ? (
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">

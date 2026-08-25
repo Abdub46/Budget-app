@@ -5,6 +5,7 @@ import { registerSchema } from '@/lib/validations';
 import { hashPassword } from '@/lib/password';
 import { provisionDefaultCategories } from '@/lib/provision-categories';
 import { rateLimit, getClientIp } from '@/lib/rate-limit';
+import { ensureStrategy } from '@/lib/budget-engine';
 
 export async function POST(req: Request) {
   try {
@@ -58,9 +59,30 @@ export async function POST(req: Request) {
       institution: data.employmentStatus === 'student' ? data.institution : undefined,
       course: data.employmentStatus === 'student' ? data.course : undefined,
       averageMonthlyBudget: data.averageMonthlyBudget,
+      monthlyIncome: data.monthlyIncome,
+      housingExpense: data.housingExpense,
+      foodExpense: data.foodExpense,
+      transportExpense: data.transportExpense,
+      utilitiesExpense: data.utilitiesExpense,
+      debtPayment: data.debtPayment,
+      currentSavings: data.currentSavings,
+      emergencyFund: data.emergencyFund,
+      dependents: data.dependents,
+      incomeStability: data.incomeStability,
+      financialGoal: data.financialGoal || undefined,
+      savingsGoal: data.savingsGoal || undefined,
     });
 
-    await provisionDefaultCategories(user._id);
+    await Promise.all([
+      provisionDefaultCategories(user._id),
+      // Generates the user's first AI-recommended budget allocation right
+      // away, from the financial details just collected at onboarding
+      // (spec §4). Never blocks registration if it somehow fails — the
+      // dashboard falls back to generating it lazily via ensureStrategy().
+      ensureStrategy(user._id).catch((err) =>
+        console.error(`Could not generate initial budget strategy for user ${user._id}:`, err)
+      ),
+    ]);
 
     return NextResponse.json(
       {

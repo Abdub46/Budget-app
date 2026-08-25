@@ -27,7 +27,7 @@ const clientRegisterSchema = z
     confirmPassword: z.string(),
     country: z.string().trim().min(2, 'Country is required'),
     currency: z.string().trim().length(3),
-    employmentStatus: z.enum(['employed', 'self-employed', 'student']),
+    employmentStatus: z.enum(['employed', 'self-employed', 'student', 'other']),
     employmentPlace: z.string().trim().max(160).optional(),
     position: z.string().trim().max(120).optional(),
     businessName: z.string().trim().max(160).optional(),
@@ -37,6 +37,18 @@ const clientRegisterSchema = z
     averageMonthlyBudget: z.coerce
       .number({ invalid_type_error: 'Enter your average monthly budget' })
       .min(0, 'Amount cannot be negative'),
+    monthlyIncome: z.coerce.number().min(0).default(0),
+    housingExpense: z.coerce.number().min(0).default(0),
+    foodExpense: z.coerce.number().min(0).default(0),
+    transportExpense: z.coerce.number().min(0).default(0),
+    utilitiesExpense: z.coerce.number().min(0).default(0),
+    debtPayment: z.coerce.number().min(0).default(0),
+    currentSavings: z.coerce.number().min(0).default(0),
+    emergencyFund: z.coerce.number().min(0).default(0),
+    dependents: z.coerce.number().int().min(0).max(50).default(0),
+    incomeStability: z.enum(['stable', 'variable', 'unstable']).default('stable'),
+    financialGoal: z.string().trim().max(240).optional(),
+    savingsGoal: z.string().trim().max(240).optional(),
   })
   .superRefine((data, ctx) => {
     if (data.password !== data.confirmPassword) {
@@ -189,6 +201,7 @@ export default function RegisterForm() {
           <option value="employed">Employed</option>
           <option value="self-employed">Self-employed</option>
           <option value="student">Student</option>
+          <option value="other">Other</option>
         </Select>
 
         <AnimatePresence mode="wait">
@@ -280,6 +293,51 @@ export default function RegisterForm() {
           hint="This is your baseline — each month's actual budget will be compared against it."
           error={errors.averageMonthlyBudget?.message}
           {...register('averageMonthlyBudget')}
+        />
+      </div>
+
+      {/* AI budgeting profile — used to personalize the Needs/Wants/Savings
+          allocation instead of forcing a fixed 50/30/20 split. Everything
+          here is optional; the AI engine simply lowers its confidence
+          level when a field is left at 0/blank rather than requiring it. */}
+      <div className="space-y-4 border-t border-border pt-5">
+        <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+          AI budgeting profile <span className="normal-case font-normal text-muted-foreground/70">(optional, but improves your recommendation)</span>
+        </p>
+        <Input
+          label="Monthly income"
+          type="number"
+          step="0.01"
+          min="0"
+          placeholder="e.g. 80000"
+          hint="If different from your average monthly budget above."
+          error={errors.monthlyIncome?.message}
+          {...register('monthlyIncome')}
+        />
+        <div className="grid grid-cols-2 gap-3">
+          <Input label="Housing / rent" type="number" step="0.01" min="0" placeholder="0" {...register('housingExpense')} />
+          <Input label="Food" type="number" step="0.01" min="0" placeholder="0" {...register('foodExpense')} />
+          <Input label="Transport" type="number" step="0.01" min="0" placeholder="0" {...register('transportExpense')} />
+          <Input label="Utilities" type="number" step="0.01" min="0" placeholder="0" {...register('utilitiesExpense')} />
+          <Input label="Debt / loan payments" type="number" step="0.01" min="0" placeholder="0" {...register('debtPayment')} />
+          <Input label="Dependents" type="number" step="1" min="0" placeholder="0" {...register('dependents')} />
+          <Input label="Current savings" type="number" step="0.01" min="0" placeholder="0" {...register('currentSavings')} />
+          <Input label="Emergency fund" type="number" step="0.01" min="0" placeholder="0" {...register('emergencyFund')} />
+        </div>
+        <Select label="How stable is your income?" {...register('incomeStability')}>
+          <option value="stable">Stable — regular, predictable income</option>
+          <option value="variable">Variable — fluctuates month to month</option>
+          <option value="unstable">Unstable — irregular or unreliable</option>
+        </Select>
+        <Input
+          label="Financial goal (optional)"
+          placeholder="e.g. Save for a house deposit"
+          {...register('financialGoal')}
+        />
+        <Input
+          label="Savings / investment goal (optional)"
+          placeholder="e.g. KSh 500,000 emergency fund by next year"
+          {...register('savingsGoal')}
         />
       </div>
 

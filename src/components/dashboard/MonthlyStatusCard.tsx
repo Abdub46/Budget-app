@@ -114,7 +114,7 @@ export default function MonthlyStatusCard({
         <div className="mt-4 border-t border-border pt-3">
           <p className="flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
             <Target className="h-3.5 w-3.5" />
-            50/30/20 Ratio
+            Your Budget Allocation
           </p>
           {(() => {
             const belowTarget = budgetGroups.filter((g) => g.status === 'below');

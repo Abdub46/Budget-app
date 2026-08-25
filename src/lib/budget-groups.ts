@@ -16,6 +16,12 @@ export const BUDGET_GROUP_LABELS: Record<BudgetGroupKey, string> = {
   savings: 'Savings & Financial Goals',
 };
 
+/**
+ * Fallback only — used before a user has any AI/custom BudgetStrategy yet
+ * (e.g. a brand-new account before the first strategy has been generated).
+ * Once a strategy exists, its needs/wants/savings percentages are always
+ * used instead — see `computeBudgetGroupBreakdown`'s `targetPercent` param.
+ */
 export const BUDGET_GROUP_TARGET_PERCENT: Record<BudgetGroupKey, number> = {
   needs: 50,
   wants: 30,
@@ -80,10 +86,11 @@ const STATUS_TOLERANCE_PERCENT = 0.5;
 
 export function computeBudgetGroupBreakdown(
   totalBudget: number,
-  amountByGroup: Record<BudgetGroupKey, number>
+  amountByGroup: Record<BudgetGroupKey, number>,
+  targetPercentByGroup: Record<BudgetGroupKey, number> = BUDGET_GROUP_TARGET_PERCENT
 ): BudgetGroupBreakdownEntry[] {
   return BUDGET_GROUP_KEYS.map((key) => {
-    const targetPercent = BUDGET_GROUP_TARGET_PERCENT[key];
+    const targetPercent = targetPercentByGroup[key] ?? BUDGET_GROUP_TARGET_PERCENT[key];
     const targetAmount = (totalBudget * targetPercent) / 100;
     const actualAmount = amountByGroup[key] ?? 0;
     const actualPercent = totalBudget > 0 ? (actualAmount / totalBudget) * 100 : 0;
@@ -116,6 +123,20 @@ export function computeBudgetGroupBreakdown(
  * resolved group (or whose category no longer exists) are excluded from
  * all three groups — only explicitly-or-default-assigned categories count.
  */
+/** Builds a targetPercentByGroup map from an active BudgetStrategy (AI or custom). */
+export function targetPercentsFromStrategy(strategy: {
+  needsPercent: number;
+  wantsPercent: number;
+  savingsPercent: number;
+} | null): Record<BudgetGroupKey, number> {
+  if (!strategy) return BUDGET_GROUP_TARGET_PERCENT;
+  return {
+    needs: strategy.needsPercent,
+    wants: strategy.wantsPercent,
+    savings: strategy.savingsPercent,
+  };
+}
+
 export function sumAmountsByGroup(
   entries: Array<{ categoryId: string; amount: number }>,
   groupByCategoryId: Map<string, BudgetGroupKey | null>

@@ -5,6 +5,9 @@ import { MonthlyBudget, User } from '@/models';
 import { jsonError, withErrorHandling } from '@/lib/api-helpers';
 import { resolvePeriod, type MonthYear } from '@/lib/period';
 import { computePeriodAnalytics, computeBudgetComparison } from '@/lib/analytics';
+import { targetPercentsFromStrategy } from '@/lib/budget-groups';
+import { ensureStrategy } from '@/lib/budget-engine';
+import { computeBudgetHealth } from '@/lib/budget-health';
 import type { PeriodPreset } from '@/types';
 
 const VALID_PRESETS: PeriodPreset[] = [
@@ -46,20 +49,26 @@ export async function GET(req: Request) {
 
     const range = resolvePeriod(preset, nowMY, { firstBudgetMonth, customFrom, customTo });
 
-    const [analytics, user] = await Promise.all([
-      computePeriodAnalytics(userId, range),
+    const [strategy, user] = await Promise.all([
+      ensureStrategy(userId),
       User.findById(userId).select('averageMonthlyBudget currency').lean(),
     ]);
 
+    const analytics = await computePeriodAnalytics(userId, range, targetPercentsFromStrategy(strategy));
+
     const averageMonthlyBudget = user?.averageMonthlyBudget ?? 0;
     const comparison = computeBudgetComparison(analytics.averageActualBudget, averageMonthlyBudget);
+    const currency = user?.currency ?? 'KES';
+    const budgetHealth = computeBudgetHealth(analytics.utilizationPercent, analytics.budgetGroups, currency);
 
     return NextResponse.json({
       period: { preset, ...range },
-      currency: user?.currency ?? 'KES',
+      currency,
       averageMonthlyBudget,
       averageActualBudgetComparison: comparison,
       ...analytics,
+      budgetHealth,
+      budgetStrategy: strategy,
     });
   });
 }

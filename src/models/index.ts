@@ -4,6 +4,7 @@ export { default as BudgetAddition } from './BudgetAddition';
 export { default as Category } from './Category';
 export { default as Expense } from './Expense';
 export { default as Report } from './Report';
+export { default as BudgetStrategy } from './BudgetStrategy';
 
 export type { IUser, IUserSettings } from './User';
 export type { IMonthlyBudget } from './MonthlyBudget';
@@ -11,3 +12,8 @@ export type { IBudgetAddition } from './BudgetAddition';
 export type { ICategory } from './Category';
 export type { IExpense } from './Expense';
 export type { IReport } from './Report';
+export type {
+  IBudgetStrategy,
+  BudgetStrategySource,
+  BudgetStrategyConfidence,
+} from './BudgetStrategy';

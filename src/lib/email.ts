@@ -50,7 +50,21 @@ export async function sendMonthlyReportEmail(params: {
           <td style="padding: 8px 0; color: #6b7280; font-size: 14px;">Remaining</td>
           <td style="padding: 8px 0; text-align: right; font-weight: 700; font-size: 14px;">${formatCurrency(snapshot.remaining, currency)}</td>
         </tr>
+        <tr>
+          <td style="padding: 8px 0; color: #6b7280; font-size: 14px;">Savings</td>
+          <td style="padding: 8px 0; text-align: right; font-weight: 700; font-size: 14px;">${formatCurrency(snapshot.totalSavings, currency)}</td>
+        </tr>
       </table>
+      ${
+        snapshot.budgetHealth
+          ? `<p style="font-size: 14px; margin: 0 0 8px;"><strong>Budget health: ${snapshot.budgetHealth.label}.</strong> ${snapshot.budgetHealth.explanation}</p>`
+          : ''
+      }
+      ${
+        snapshot.budgetStrategy
+          ? `<p style="font-size: 14px; line-height: 1.6; color: #374151;">${snapshot.budgetStrategy.reasoning.split('. ')[0]}.</p>`
+          : ''
+      }
       <p style="font-size: 14px; color: #6b7280;">Your complete report is attached.</p>
       <p style="font-size: 12px; color: #9ca3af; margin-top: 32px;">
         This email was sent because monthly reports are enabled in your Budget settings.

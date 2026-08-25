@@ -1,12 +1,12 @@
 'use client';
 
 const SUGGESTIONS = [
-  'Where am I spending most of my money?',
-  'Am I within my budget?',
-  'Did I spend more this month than last month?',
-  'Which category should I watch?',
-  'How much have I saved this year?',
-  'Give me a summary of my financial performance.',
+  'Can I afford this?',
+  'How much can I spend this week?',
+  'Am I overspending?',
+  'Why did my budget change?',
+  'How much should I save?',
+  'How can I reduce my expenses?',
 ];
 
 export default function SuggestedQuestions({ onSelect }: { onSelect: (q: string) => void }) {

@@ -129,6 +129,43 @@ export default function MonthlyReportDocument({
 
         <View style={styles.divider} />
 
+        {/* Budget Allocation (AI-driven, per spec) */}
+        {snapshot.budgetStrategy && (
+          <View style={styles.section}>
+            <Text style={styles.sectionTitle}>Budget Allocation</Text>
+            <View style={styles.row}>
+              <Text style={styles.label}>Strategy</Text>
+              <Text style={styles.value}>
+                {snapshot.budgetStrategy.source === 'ai' ? 'AI Recommended' : 'Custom Budget'}
+              </Text>
+            </View>
+            <View style={styles.highlightBox}>
+              <View style={styles.highlightCard}>
+                <Text style={styles.highlightLabel}>Needs</Text>
+                <Text style={styles.highlightValue}>{snapshot.budgetStrategy.needsPercent}%</Text>
+              </View>
+              <View style={styles.highlightCard}>
+                <Text style={styles.highlightLabel}>Wants</Text>
+                <Text style={styles.highlightValue}>{snapshot.budgetStrategy.wantsPercent}%</Text>
+              </View>
+              <View style={styles.highlightCard}>
+                <Text style={styles.highlightLabel}>Savings &amp; Investments</Text>
+                <Text style={styles.highlightValue}>{snapshot.budgetStrategy.savingsPercent}%</Text>
+              </View>
+            </View>
+            <Text style={{ ...styles.label, marginTop: 8 }}>{snapshot.budgetStrategy.reasoning}</Text>
+            {snapshot.budgetHealth && (
+              <View style={{ ...styles.statusBadge, backgroundColor: '#eef2ff', color: '#3730a3', marginTop: 8 }}>
+                <Text>
+                  Budget Health: {snapshot.budgetHealth.label} — {snapshot.budgetHealth.explanation}
+                </Text>
+              </View>
+            )}
+          </View>
+        )}
+
+        <View style={styles.divider} />
+
         {/* Spending */}
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>Spending</Text>

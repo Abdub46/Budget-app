@@ -24,6 +24,9 @@ interface CategoryItem {
 
 export default function BudgetGroupsSection() {
   const [categories, setCategories] = useState<CategoryItem[]>([]);
+  const [targetPercent, setTargetPercent] = useState<Record<BudgetGroupKey, number>>(
+    BUDGET_GROUP_TARGET_PERCENT
+  );
   const [loading, setLoading] = useState(true);
   const [pendingId, setPendingId] = useState<string | null>(null);
   const [addSelections, setAddSelections] = useState<Record<BudgetGroupKey, string>>({
@@ -33,9 +36,22 @@ export default function BudgetGroupsSection() {
   });
 
   const load = useCallback(async () => {
-    const res = await fetch('/api/categories');
-    const result = await res.json();
-    if (res.ok) setCategories(result.categories);
+    const [categoriesRes, strategyRes] = await Promise.all([
+      fetch('/api/categories'),
+      fetch('/api/budget-strategy'),
+    ]);
+    const categoriesResult = await categoriesRes.json();
+    if (categoriesRes.ok) setCategories(categoriesResult.categories);
+    if (strategyRes.ok) {
+      const { strategy } = await strategyRes.json();
+      if (strategy) {
+        setTargetPercent({
+          needs: strategy.needsPercent,
+          wants: strategy.wantsPercent,
+          savings: strategy.savingsPercent,
+        });
+      }
+    }
     setLoading(false);
   }, []);
 
@@ -80,8 +96,8 @@ export default function BudgetGroupsSection() {
 
   return (
     <SettingsSection
-      title="Budget Ratio (50/30/20)"
-      description="Choose which categories count toward your Needs, Wants, and Savings & Financial Goals targets."
+      title="Budget Categories"
+      description="Choose which categories count toward your AI-recommended (or custom) Needs, Wants, and Savings & Investments targets."
     >
       <div className="space-y-5">
         {BUDGET_GROUP_KEYS.map((groupKey) => {
@@ -97,7 +113,7 @@ export default function BudgetGroupsSection() {
                   {BUDGET_GROUP_LABELS[groupKey]}
                 </h3>
                 <span className="text-xs font-medium text-muted-foreground">
-                  Target {BUDGET_GROUP_TARGET_PERCENT[groupKey]}%
+                  Target {targetPercent[groupKey]}%
                 </span>
               </div>
 
