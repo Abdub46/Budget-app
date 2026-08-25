@@ -70,12 +70,31 @@ export default function MonthlyStatusCard({
       initial={{ opacity: 0, y: 8 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.3 }}
-      className="rounded-2xl border border-border bg-gradient-to-br from-card to-muted/40 p-6 shadow-card"
+      className="relative overflow-hidden rounded-[28px] border border-border/60 bg-card/70 shadow-elevated backdrop-blur-md"
     >
+      {/* Decorative layer — subtle geometric pattern + green/blue accent edges. Purely visual, sits behind the content. */}
+      <div
+        aria-hidden
+        className="pointer-events-none absolute inset-0 text-foreground opacity-[0.04]"
+        style={{
+          backgroundImage:
+            'repeating-linear-gradient(135deg, currentColor 0px, currentColor 1px, transparent 1px, transparent 16px)',
+        }}
+      />
+      <div
+        aria-hidden
+        className="pointer-events-none absolute left-0 top-8 bottom-8 w-[3px] rounded-full bg-gradient-to-b from-success/70 via-success/25 to-transparent"
+      />
+      <div
+        aria-hidden
+        className="pointer-events-none absolute right-0 top-8 bottom-8 w-[3px] rounded-full bg-gradient-to-b from-primary/70 via-primary/25 to-transparent"
+      />
+
+      <div className="relative p-7 sm:p-8">
       <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
         {label} Budget
       </p>
-      <div className="mt-1 flex items-center gap-2">
+      <div className="mt-1.5 flex items-center gap-2">
         <p className="text-3xl font-semibold text-foreground tabular-nums">
           {isHidden ? '••••••' : formatCurrency(totalBudget ?? 0, currency)}
         </p>
@@ -90,7 +109,7 @@ export default function MonthlyStatusCard({
         </button>
       </div>
 
-      <div className="mt-3 flex flex-wrap items-center gap-3">
+      <div className="mt-4 flex flex-wrap items-center gap-3">
         <span
           className={`inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-medium ${badge}`}
         >
@@ -111,7 +130,7 @@ export default function MonthlyStatusCard({
       </p>
 
       {budgetGroups && budgetGroups.length > 0 && (
-        <div className="mt-4 border-t border-border pt-3">
+        <div className="mt-5 border-t border-border/70 pt-4">
           <p className="flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
             <Target className="h-3.5 w-3.5" />
             Your Budget Allocation
@@ -120,14 +139,14 @@ export default function MonthlyStatusCard({
             const belowTarget = budgetGroups.filter((g) => g.status === 'below');
             if (belowTarget.length === 0) {
               return (
-                <p className="mt-2 flex items-center gap-1.5 text-xs text-success">
+                <p className="mt-2.5 flex items-center gap-1.5 text-xs text-success">
                   <CheckCircle2 className="h-3.5 w-3.5" />
                   All categories have reached their target ratio.
                 </p>
               );
             }
             return (
-              <ul className="mt-2 space-y-1.5">
+              <ul className="mt-2.5 space-y-2">
                 {belowTarget.map((g) => (
                   <li key={g.key} className="flex items-center justify-between gap-3 text-xs">
                     <span className="text-muted-foreground">
@@ -146,6 +165,7 @@ export default function MonthlyStatusCard({
           })()}
         </div>
       )}
+      </div>
     </motion.div>
   );
 }
