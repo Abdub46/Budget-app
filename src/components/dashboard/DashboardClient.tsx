@@ -52,7 +52,14 @@ interface CurrentMonthResponse {
 
 export default function DashboardClient() {
   const { data: session } = useSession();
-  const firstName = session?.user?.name?.split(' ')[0];
+  const fullName = session?.user?.name ?? undefined;
+  const firstName = fullName?.split(' ')[0];
+
+  const [greeting, setGreeting] = useState('Welcome back');
+  useEffect(() => {
+    const hour = new Date().getHours();
+    setGreeting(hour < 12 ? 'Good morning' : hour < 18 ? 'Good afternoon' : 'Good evening');
+  }, []);
 
   const [preset, setPreset] = useState<PeriodPreset>('current-month');
   const [customRange, setCustomRange] = useState<{ from: string; to: string } | null>(null);
@@ -117,10 +124,10 @@ export default function DashboardClient() {
       <div className="flex flex-wrap items-start justify-between gap-4">
         <div>
           <h1 className="text-xl font-semibold text-foreground">
-            {firstName ? `Welcome back, ${firstName}` : 'Dashboard'}
+            {firstName ? `${greeting}, ${firstName}` : 'Dashboard'}
           </h1>
-          {summary && (
-            <p className="text-sm text-muted-foreground mt-0.5">{summary.period.label}</p>
+          {fullName && (
+            <p className="text-sm text-muted-foreground mt-0.5">{fullName}</p>
           )}
         </div>
         <PeriodSelector preset={preset} onChange={handlePeriodChange} />
