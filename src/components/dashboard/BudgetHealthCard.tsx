@@ -15,22 +15,22 @@ const STATUS_STYLES: Record<
 > = {
   excellent: {
     icon: CheckCircle2,
-    wrap: 'border-success/30 bg-success-light',
+    wrap: 'border-success/30 bg-success-light dark:bg-success/10',
     badge: 'bg-success text-white',
   },
   good: {
     icon: ThumbsUp,
-    wrap: 'border-primary/30 bg-primary-50',
+    wrap: 'border-primary/30 bg-primary-50 dark:bg-primary/10',
     badge: 'bg-primary text-white',
   },
   attention: {
     icon: AlertTriangle,
-    wrap: 'border-warning/30 bg-warning-light',
+    wrap: 'border-warning/30 bg-warning-light dark:bg-warning/10',
     badge: 'bg-warning text-white',
   },
   critical: {
     icon: AlertOctagon,
-    wrap: 'border-danger/30 bg-danger-light',
+    wrap: 'border-danger/30 bg-danger-light dark:bg-danger/10',
     badge: 'bg-danger text-white',
   },
 };
