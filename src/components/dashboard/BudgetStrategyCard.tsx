@@ -39,9 +39,13 @@ function formatDate(iso: string) {
 export default function BudgetStrategyCard({
   strategy,
   onUpdated,
+  readOnly = false,
 }: {
   strategy: BudgetStrategy;
   onUpdated: (strategy: BudgetStrategy) => void;
+  /** Dashboard shows this card as an at-a-glance summary only — customizing
+   * or reverting the allocation is done from the Budget page instead. */
+  readOnly?: boolean;
 }) {
   const [showCustomize, setShowCustomize] = useState(false);
   const [isReverting, setIsReverting] = useState(false);
@@ -96,17 +100,19 @@ export default function BudgetStrategyCard({
           </div>
         </div>
 
-        <div className="flex gap-2">
-          <Button size="sm" variant="outline" onClick={() => setShowCustomize(true)}>
-            Customize Budget
-          </Button>
-          {strategy.source === 'custom' && (
-            <Button size="sm" variant="ghost" onClick={revertToAi} isLoading={isReverting}>
-              <RotateCcw className="h-3.5 w-3.5" />
-              Use AI recommendation
+        {!readOnly && (
+          <div className="flex gap-2">
+            <Button size="sm" variant="outline" onClick={() => setShowCustomize(true)}>
+              Customize Budget
             </Button>
-          )}
-        </div>
+            {strategy.source === 'custom' && (
+              <Button size="sm" variant="ghost" onClick={revertToAi} isLoading={isReverting}>
+                <RotateCcw className="h-3.5 w-3.5" />
+                Use AI recommendation
+              </Button>
+            )}
+          </div>
+        )}
       </div>
 
       {/* Allocation bar */}
@@ -151,7 +157,13 @@ export default function BudgetStrategyCard({
         </span>
       </div>
 
-      {showCustomize && (
+      {readOnly && (
+        <p className="mt-3 text-xs text-muted-foreground">
+          Manage this from the <span className="font-medium text-foreground">Budget</span> page.
+        </p>
+      )}
+
+      {!readOnly && showCustomize && (
         <CustomizeBudgetModal
           initial={strategy}
           onClose={() => setShowCustomize(false)}

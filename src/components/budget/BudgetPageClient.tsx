@@ -11,6 +11,7 @@ import AddFundsModal from '@/components/budget/AddFundsModal';
 import ExpenseFormModal, { type CategoryOption } from '@/components/budget/ExpenseFormModal';
 import ExpenseList, { type ExpenseItem } from '@/components/budget/ExpenseList';
 import CategoryManager from '@/components/budget/CategoryManager';
+import BudgetStrategyCard, { type BudgetStrategy } from '@/components/dashboard/BudgetStrategyCard';
 import { Button } from '@/components/ui/Button';
 import { Select } from '@/components/ui/Input';
 
@@ -35,6 +36,8 @@ export default function BudgetPageClient() {
   const [budget, setBudget] = useState<BudgetData | null>(null);
   const [totalExpenses, setTotalExpenses] = useState(0);
   const [budgetLoading, setBudgetLoading] = useState(true);
+
+  const [strategy, setStrategy] = useState<BudgetStrategy | null>(null);
 
   const [categories, setCategories] = useState<(CategoryOption & { isDefault: boolean })[]>([]);
 
@@ -105,9 +108,19 @@ export default function BudgetPageClient() {
     }
   }, [month, year, expensePage, categoryFilter]);
 
+  const loadStrategy = useCallback(async () => {
+    const res = await fetch('/api/budget-strategy');
+    const result = await res.json();
+    if (res.ok) setStrategy(result.strategy);
+  }, []);
+
   useEffect(() => {
     loadBudget();
   }, [loadBudget]);
+
+  useEffect(() => {
+    loadStrategy();
+  }, [loadStrategy]);
 
   useEffect(() => {
     loadCategories();
@@ -167,6 +180,8 @@ export default function BudgetPageClient() {
           onAddFunds={() => setAddFundsOpen(true)}
         />
       )}
+
+      {strategy && <BudgetStrategyCard strategy={strategy} onUpdated={setStrategy} />}
 
       <div className="grid lg:grid-cols-3 gap-6">
         <div className="lg:col-span-2 space-y-4">

@@ -16,14 +16,20 @@ export default function Sidebar({ userName }: { userName?: string | null }) {
   return (
     <aside className="hidden lg:flex lg:flex-col lg:w-64 lg:shrink-0 border-r border-border bg-card/50 h-screen sticky top-0">
       <div className="flex items-center gap-2 px-6 h-16 border-b border-border">
-        <Avatar
-          src={avatarUrl}
-          name={userName}
-          size={32}
-          className="rounded-lg"
-          showInitials={false}
-          fallbackIcon={<Wallet className="h-[18px] w-[18px]" />}
-        />
+        <Link
+          href="/settings"
+          aria-label="Go to settings"
+          className="rounded-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+        >
+          <Avatar
+            src={avatarUrl}
+            name={userName}
+            size={32}
+            className="rounded-lg"
+            showInitials={false}
+            fallbackIcon={<Wallet className="h-[18px] w-[18px]" />}
+          />
+        </Link>
         <span className="font-semibold text-foreground">Budget</span>
       </div>
 

@@ -148,7 +148,7 @@ export default function DashboardClient() {
       <div className="grid lg:grid-cols-3 gap-5 items-start">
         {strategy && (
           <div className="lg:col-span-2">
-            <BudgetStrategyCard strategy={strategy} onUpdated={setStrategy} />
+            <BudgetStrategyCard strategy={strategy} onUpdated={setStrategy} readOnly />
           </div>
         )}
         {summary?.budgetHealth && <BudgetHealthCard health={summary.budgetHealth} />}
