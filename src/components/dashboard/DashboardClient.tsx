@@ -53,7 +53,6 @@ interface CurrentMonthResponse {
 export default function DashboardClient() {
   const { data: session } = useSession();
   const fullName = session?.user?.name ?? undefined;
-  const firstName = fullName?.split(' ')[0];
 
   const [greeting, setGreeting] = useState('Welcome back');
   useEffect(() => {
@@ -123,9 +122,7 @@ export default function DashboardClient() {
     <div className="p-4 sm:p-6 lg:p-10 space-y-6 max-w-7xl mx-auto">
       <div className="flex flex-wrap items-start justify-between gap-4">
         <div>
-          <h1 className="text-xl font-semibold text-foreground">
-            {firstName ? `${greeting}, ${firstName}` : 'Dashboard'}
-          </h1>
+          <h1 className="text-xl font-semibold text-foreground">{greeting}</h1>
           {fullName && (
             <p className="text-sm text-muted-foreground mt-0.5">{fullName}</p>
           )}
